@@ -422,7 +422,7 @@ void QGLPathItem::processPreview(const pb::Preview &preview)
     switch (preview.type())
     {
     case pb::PV_STRAIGHT_PROBE:  /*nothing*/ return;
-    case pb::PV_RIGID_TAP:  /*nothing*/ return;
+    case pb::PV_SPINDLE_SYNC_MOTION:  /*nothing*/ return;
     case pb::PV_STRAIGHT_FEED: processStraightMove(preview, FeedMove); return;
     case pb::PV_ARC_FEED: processArcFeed(preview); return;
     case pb::PV_STRAIGHT_TRAVERSE: processStraightMove(preview, TraverseMove); return;
