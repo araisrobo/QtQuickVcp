@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Alexander Rössler
+** Copyright (C) 2015 Alexander Rössler
 ** License: LGPL version 2.1
 **
 ** This file is part of QtQuickVcp.
@@ -16,18 +16,15 @@
 ** Lesser General Public License for more details.
 **
 ** Contributors:
-** Alexander Rössler @ The Cool Tool GmbH <mail DOT aroessler AT gmail DOT com>
+** Alexander Rössler <mail AT rossler DOT systems>
 **
 ****************************************************************************/
-import QtQuick 2.1
-import QtQuick.Controls 1.0
-import Machinekit.Controls 1.0
+#include "qapplicationpluginitem.h"
 
-ValueChart {
-    minimumValue: 0
-    maximumValue: 200
-    valueModel: ValueModel {
-        targetValue: 100
-        maximumSize: 2000
-    }
-} 
+QApplicationPluginItem::QApplicationPluginItem(QObject *parent) :
+    QObject(parent),
+    m_type(Qt5QmlPlugin)
+{
+
+}
+

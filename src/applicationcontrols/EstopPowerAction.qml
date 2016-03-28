@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Alexander Rössler
+** Copyright (C) 2016 Alexander Rössler
 ** License: LGPL version 2.1
 **
 ** This file is part of QtQuickVcp.
@@ -16,33 +16,41 @@
 ** Lesser General Public License for more details.
 **
 ** Contributors:
-** Alexander Rössler @ The Cool Tool GmbH <mail DOT aroessler AT gmail DOT com>
+** Alexander Rössler <mail AT roesser DOT systems>
 **
 ****************************************************************************/
-
 import QtQuick 2.0
 import QtQuick.Controls 1.2
 import Machinekit.Application 1.0
 
 ApplicationAction {
+    property bool reset: false
     property bool _ready: status.synced && command.connected
 
     id: root
-    text: qsTr("Estop")
-    //iconName: "process-stop"
-    iconSource: "qrc:Machinekit/Application/Controls/icons/process-stop"
-    shortcut: "F1"
-    tooltip: qsTr("Toggle Emergency Stop [%1]").arg(shortcut)
+    text: qsTr("Power")
+    //iconName: "system-shutdown"
+    iconSource: "qrc:Machinekit/Application/Controls/icons/system-shutdown"
+    shortcut: "F2"
+    tooltip: qsTr("Reset Machine [%1]").arg(shortcut)
     checkable: true
     onTriggered: {
-        if (checked) {
-            command.setTaskState('execute', ApplicationCommand.TaskStateEstop)
+        if (!checked) {
+            if (status.task.taskState === ApplicationStatus.TaskStateEstop) {
+                command.setTaskState('execute', ApplicationCommand.TaskStateEstopReset)
+            }
+            command.setTaskState('execute', ApplicationCommand.TaskStateOn)
         }
         else {
-            command.setTaskState('execute', ApplicationCommand.TaskStateEstopReset)
+            command.setTaskState('execute', ApplicationCommand.TaskStateEstop)
+            if (reset)
+            {
+                command.setTaskState('execute', ApplicationCommand.TaskStateEstopReset)
+                command.setTaskState('execute', ApplicationCommand.TaskStateOn)
+            }
         }
     }
 
-    checked: _ready && (status.task.taskState === ApplicationStatus.TaskStateEstop)
+    checked: _ready && (status.task.taskState !== ApplicationStatus.TaskStateOn)
     enabled: _ready
 }

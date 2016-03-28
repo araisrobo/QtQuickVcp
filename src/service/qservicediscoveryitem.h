@@ -25,6 +25,7 @@
 #include <QObject>
 #include <QHostAddress>
 #include <QDateTime>
+#include <QSet>
 
 class QServiceDiscoveryItem : public QObject
 {
@@ -35,7 +36,8 @@ class QServiceDiscoveryItem : public QObject
     Q_PROPERTY(QString uuid READ uuid NOTIFY uuidChanged)
     Q_PROPERTY(int version READ version NOTIFY versionChanged)
     Q_PROPERTY(int port READ port NOTIFY portChanged)
-    Q_PROPERTY(QHostAddress hostAddress READ hostAddress NOTIFY hostAddressChanged)
+    Q_PROPERTY(QString hostName READ hostName NOTIFY hostNameChanged)
+    Q_PROPERTY(QString hostAddress READ hostAddress NOTIFY hostAddressChanged)
     Q_PROPERTY(QStringList txtRecords READ txtRecords NOTIFY txtRecordsChanged)
     Q_PROPERTY(bool updated READ updated WRITE setUpdated NOTIFY updatedChanged)
 
@@ -53,7 +55,12 @@ public:
         return m_port;
     }
 
-    QHostAddress hostAddress() const
+    QString hostName() const
+    {
+        return m_hostName;
+    }
+
+    QString hostAddress() const
     {
         return m_hostAddress;
     }
@@ -78,9 +85,14 @@ public:
         return m_uuid;
     }
 
-    int outstandingRequests() const
+    QSet<int> outstandingRequests() const
     {
         return m_outstandingRequests;
+    }
+
+    bool hasOutstandingRequests()
+    {
+        return (!m_outstandingRequests.isEmpty());
     }
 
     int version() const
@@ -114,7 +126,16 @@ public slots:
             emit portChanged(arg);
         }
     }
-    void setHostAddress(QHostAddress arg)
+
+    void setHostName(QString arg)
+    {
+        if (m_hostName != arg) {
+            m_hostName = arg;
+            emit hostNameChanged(arg);
+        }
+    }
+
+    void setHostAddress(QString arg)
     {
         if (m_hostAddress != arg) {
             m_hostAddress = arg;
@@ -148,9 +169,19 @@ public slots:
         }
     }
 
-    void setOutstandingRequests(int arg)
+    void addOutstandingRequest(int arg)
     {
-        m_outstandingRequests = arg;
+        m_outstandingRequests.insert(arg);
+    }
+
+    void removeOutstandingRequest(int arg)
+    {
+        m_outstandingRequests.remove(arg);
+    }
+
+    void clearOutstandingRequests()
+    {
+        m_outstandingRequests.clear();
     }
 
     void setVersion(int arg)
@@ -194,16 +225,18 @@ private:
     QString m_uuid;
     int m_version;
     int m_port;
-    QHostAddress m_hostAddress;
+    QString m_hostName;
+    QString m_hostAddress;
     QStringList m_txtRecords;
-    int m_outstandingRequests;
+    QSet<int> m_outstandingRequests;
     bool m_updated;
     int m_errorCount;
 
 signals:
     void uriChanged(QString arg);
     void portChanged(int arg);
-    void hostAddressChanged(QHostAddress arg);
+    void hostNameChanged(QString hostName);
+    void hostAddressChanged(QString arg);
     void nameChanged(QString arg);
     void typeChanged(QString arg);
     void txtRecordsChanged(QStringList arg);

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 Alexander Rössler
+** Copyright (C) 2016 Alexander Rössler
 ** License: LGPL version 2.1
 **
 ** This file is part of QtQuickVcp.
@@ -16,24 +16,34 @@
 ** Lesser General Public License for more details.
 **
 ** Contributors:
-** Alexander Rössler @ The Cool Tool GmbH <mail DOT aroessler AT gmail DOT com>
+** Alexander Rössler @ The Cool Tool GmbH <mail AT roessler DOT systems>
 **
 ****************************************************************************/
 
-import QtQuick 2.0
-import QtQuick.Controls 1.2
-import Machinekit.Application 1.0
+import QtQuick 2.3
+import QtQuick.Controls.Private 1.0
 
-ApplicationAction {
-    property bool _ready: command.connected
+// This file contains private Qt Quick modules that might change in future versions of Qt
+// Tested with Qt 5.6.0
 
-    id: root
-    text: qsTr("Sh&utdown")
-    iconName: "system-shutdown"
-    iconSource: "qrc:Machinekit/Application/Controls/icons/system-shutdown"
-    tooltip: qsTr("Shutdown Machinekit instance [%1]").arg(shortcut)
-    onTriggered: {
-        command.shutdown()
+MouseArea {
+    property string text: ""
+    property int interval: 1000
+
+    id: _root
+
+    anchors.fill: parent
+    hoverEnabled: _root.enabled
+
+    onExited: Tooltip.hideText()
+    onCanceled: Tooltip.hideText()
+
+    Timer {
+        interval: _root.interval
+        running: _root.enabled && _root.containsMouse && _root.text.length
+        onTriggered: {
+            Tooltip.hideText()
+            Tooltip.showText(_root, Qt.point(_root.mouseX, _root.mouseY), _root.text)
+        }
     }
-    enabled: _ready
 }

@@ -26,7 +26,7 @@ import Machinekit.Application 1.0
 
 ApplicationAction {
     property int axis: 0
-    property double velocity: settings.initialized ? settings.value("axis" + axis + ".jogVelocity") : 0.0
+    property double velocity: settings.initialized ? settings.values["axis" + axis]["jogVelocity"] : 0.0
     property double distance: 0.0
 
     property bool _ready: status.synced && command.connected
@@ -34,7 +34,7 @@ ApplicationAction {
     id: root
     text: ""
     shortcut: ""
-    tooltip: qsTr("Jog Axis ") + axis + " [" + shortcut + "]"
+    tooltip: qsTr("Jog Axis %1 [%2]").arg(axis).arg(shortcut)
     onTriggered: {
         if (status.task.taskMode !== ApplicationStatus.TaskModeManual) {
             command.setTaskMode('execute', ApplicationCommand.TaskModeManual)
