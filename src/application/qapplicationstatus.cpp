@@ -19,7 +19,6 @@
 ** Alexander Rössler @ The Cool Tool GmbH <mail DOT aroessler AT gmail DOT com>
 **
 ****************************************************************************/
-
 #include "qapplicationstatus.h"
 #include "debughelper.h"
 
@@ -215,6 +214,16 @@ void QApplicationStatus::updateInterp(const pb::EmcStatusInterp &interp)
     emit interpChanged(m_interp);
 }
 
+//-----
+// slot
+//-----
+
+void QApplicationStatus::run_thread(const QList<QByteArray> &messageList)
+{
+   *future = QtConcurrent::run(this, &QApplicationStatus::statusMessageReceived, messageList);
+   watcher->setFuture(*future);
+}
+
 void QApplicationStatus::statusMessageReceived(const QList<QByteArray> &messageList)
 {
     QByteArray topic;
@@ -347,8 +356,19 @@ bool QApplicationStatus::connectSockets()
         return false;
     }
 
+    // connect(m_statusSocket, SIGNAL(messageReceived(QList<QByteArray>)),
+    //         this, SLOT(statusMessageReceived(QList<QByteArray>)));
+    
+    // create a QFuture and a QFutureWatcher
+    future = new QFuture<void>;
+    watcher = new QFutureWatcher<void>;
+
     connect(m_statusSocket, SIGNAL(messageReceived(QList<QByteArray>)),
-            this, SLOT(statusMessageReceived(QList<QByteArray>)));
+            this, SLOT(run_thread(QList<QByteArray>)));
+
+//TODO:   // display a message box when the calculation has finished
+//TODO:   connect(watcher, SIGNAL(finished()), 
+//TODO:           this, SLOT(displayFinishedBox()));
 
 #ifdef QT_DEBUG
     DEBUG_TAG(1, "status", "socket connected" << m_statusUri)

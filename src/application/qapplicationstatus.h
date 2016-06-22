@@ -23,6 +23,11 @@
 #ifndef QEMCSTATUS_H
 #define QEMCSTATUS_H
 
+#include <QThread>
+#include <QtConcurrentRun>
+#include <QFuture>
+#include <QFutureWatcher>
+
 #include <abstractserviceimplementation.h>
 #include <service.h>
 #include <QStringList>
@@ -33,6 +38,8 @@
 #include <google/protobuf/descriptor.h>
 #include <machinetalk/protobuf/message.pb.h>
 #include <machinetalk/protobuf/status.pb.h>
+
+
 
 #if defined(Q_OS_IOS)
 namespace gpb = google_public::protobuf;
@@ -332,8 +339,11 @@ private:
     void updateTask(const pb::EmcStatusTask &task);
     void updateInterp(const pb::EmcStatusInterp &interp);
     void initializeObject(StatusChannel channel);
+    QFuture<void> *future;
+    QFutureWatcher<void> *watcher;
 
 private slots:
+    void run_thread(const QList<QByteArray> &messageList);
     void statusMessageReceived(const QList<QByteArray> &messageList);
     void pollError(int errorNum, const QString &errorMsg);
     void statusHeartbeatTimerTick();
