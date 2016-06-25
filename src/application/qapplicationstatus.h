@@ -325,9 +325,7 @@ private:
     void start();
     void stop();
     void cleanup();
-    void startStatusHeartbeat(int interval);
     void stopStatusHeartbeat();
-    void refreshStatusHeartbeat();
     void updateState(State state);
     void updateState(State state, ConnectionError error, const QString &errorString);
     void updateError(ConnectionError error, const QString &errorString);
@@ -347,6 +345,8 @@ private slots:
     void statusMessageReceived(const QList<QByteArray> &messageList);
     void pollError(int errorNum, const QString &errorMsg);
     void statusHeartbeatTimerTick();
+    void startStatusHeartbeat(int interval);
+    void refreshStatusHeartbeat();
 
     bool connectSockets();
     void disconnectSockets();
@@ -369,6 +369,9 @@ signals:
     void runningChanged(bool arg);
     void syncedChanged(bool arg);
     void connectedChanged(bool arg);
+    void startStatusHeartbeatTimer(int interval);
+    void refreshStatusHeartbeatTimer();
+
 };
 
 #endif // QEMCSTATUS_H

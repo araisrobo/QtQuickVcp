@@ -45,6 +45,10 @@ QApplicationStatus::QApplicationStatus(QObject *parent) :
     connect(this, SIGNAL(interpChanged(QJsonObject)),
             this, SLOT(updateRunning(QJsonObject)));
 
+    connect(this, SIGNAL(startStatusHeartbeatTimer(int)),
+            this, SLOT(startStatusHeartbeat(int)));
+    connect(this, SIGNAL(refreshStatusHeartbeatTimer()),
+            this, SLOT(refreshStatusHeartbeat()));
 
     initializeObject(MotionChannel);
     initializeObject(ConfigChannel);
@@ -286,12 +290,12 @@ void QApplicationStatus::statusMessageReceived(const QList<QByteArray> &messageL
             if (m_rx.has_pparams())
             {
                 pb::ProtocolParameters pparams = m_rx.pparams();
-                startStatusHeartbeat(pparams.keepalive_timer() * 2); // wait double the time of the hearbeat interval
+                emit startStatusHeartbeatTimer(pparams.keepalive_timer() * 2); // wait double the time of the hearbeat interval
             }
         }
         else
         {
-            refreshStatusHeartbeat();
+            emit refreshStatusHeartbeatTimer();
         }
 
         return;
@@ -300,7 +304,7 @@ void QApplicationStatus::statusMessageReceived(const QList<QByteArray> &messageL
     {
         if (m_statusSocketState == Up)
         {
-            refreshStatusHeartbeat();
+            emit refreshStatusHeartbeatTimer();
         }
         else
         {
