@@ -27,7 +27,7 @@
 #include <QtConcurrentRun>
 #include <QFuture>
 #include <QFutureWatcher>
-
+#include <QEventLoop>
 #include <abstractserviceimplementation.h>
 #include <service.h>
 #include <QStringList>

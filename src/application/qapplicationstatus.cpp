@@ -55,6 +55,7 @@ QApplicationStatus::QApplicationStatus(QObject *parent) :
     initializeObject(IoChannel);
     initializeObject(TaskChannel);
     initializeObject(InterpChannel);
+
 }
 
 void QApplicationStatus::start()
@@ -224,8 +225,15 @@ void QApplicationStatus::updateInterp(const pb::EmcStatusInterp &interp)
 
 void QApplicationStatus::run_thread(const QList<QByteArray> &messageList)
 {
-   *future = QtConcurrent::run(this, &QApplicationStatus::statusMessageReceived, messageList);
-   watcher->setFuture(*future);
+#ifdef QT_DEBUG
+    DEBUG_TAG(1, "run_thread", "received messages")
+#endif
+    QEventLoop q;
+    *future = QtConcurrent::run(this, &QApplicationStatus::statusMessageReceived, messageList);
+    watcher->setFuture(*future);
+    // end QEventLoop when the calculation has finished
+    connect(watcher, SIGNAL(finished()), &q, SLOT(quit()));
+    q.exec();
 }
 
 void QApplicationStatus::statusMessageReceived(const QList<QByteArray> &messageList)
@@ -360,19 +368,12 @@ bool QApplicationStatus::connectSockets()
         return false;
     }
 
-    // connect(m_statusSocket, SIGNAL(messageReceived(QList<QByteArray>)),
-    //         this, SLOT(statusMessageReceived(QList<QByteArray>)));
-    
     // create a QFuture and a QFutureWatcher
     future = new QFuture<void>;
     watcher = new QFutureWatcher<void>;
 
     connect(m_statusSocket, SIGNAL(messageReceived(QList<QByteArray>)),
             this, SLOT(run_thread(QList<QByteArray>)));
-
-//TODO:   // display a message box when the calculation has finished
-//TODO:   connect(watcher, SIGNAL(finished()), 
-//TODO:           this, SLOT(displayFinishedBox()));
 
 #ifdef QT_DEBUG
     DEBUG_TAG(1, "status", "socket connected" << m_statusUri)
